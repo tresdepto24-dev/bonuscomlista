@@ -131,10 +131,10 @@
         </div>
     </div>
 
-    <!-- Scripts de Firebase con control de escritura estable -->
+    <!-- Scripts de Firebase con sincronización inteligente sin perder foco -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAPAI1gTljTiynlWgGa-hOALMtCnjCUFOo",
@@ -148,12 +148,11 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const dbRef = ref(db);
 
         const totalAvisos = 50;
         const contenedor = document.getElementById('grillaAvisos');
 
-        // 1. Generar la estructura de los 50 casilleros en pantalla
+        // 1. Generar la estructura de los 50 casilleros
         for (let i = 1; i <= totalAvisos; i++) {
             const numStr = i < 10 ? '00' + i : (i < 100 ? '0' + i : i);
             contenedor.innerHTML += `
@@ -172,25 +171,37 @@
             `;
         }
 
-        // 2. Cargar los datos una sola vez al iniciar para que no molesten al escribir
-        get(child(dbRef, 'bonuscom_guia_tel_50')).then((snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.val();
+        // 2. Escuchar cambios en tiempo real pero protegiendo el casillero si lo estás editando
+        const guiaRef = ref(db, 'bonuscom_guia_tel_50');
+        onValue(guiaRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
                 for (let i = 1; i <= totalAvisos; i++) {
                     const item = data['aviso_' + i];
                     if (item) {
-                        if (item.titulo) document.getElementById(`titulo-${i}`).value = item.titulo;
-                        if (item.texto) document.getElementById(`texto-${i}`).value = item.texto;
-                        if (item.hashId) document.getElementById(`hash-${i}`).innerText = 'HASH: ' + item.hashId;
-                        if (item.fechado) document.getElementById(`meta-${i}`).innerText = 'Actualizado: ' + item.fechado;
+                        const inputTitulo = document.getElementById(`titulo-${i}`);
+                        const inputTexto = document.getElementById(`texto-${i}`);
+
+                        // Solo actualiza si el usuario NO está escribiendo activamente en ese campo
+                        if (document.activeElement !== inputTitulo && item.titulo !== undefined) {
+                            inputTitulo.value = item.titulo;
+                        }
+                        if (document.activeElement !== inputTexto && item.texto !== undefined) {
+                            inputTexto.value = item.texto;
+                        }
+
+                        if (item.hashId) {
+                            document.getElementById(`hash-${i}`).innerText = 'HASH: ' + item.hashId;
+                        }
+                        if (item.fechado) {
+                            document.getElementById(`meta-${i}`).innerText = 'Actualizado: ' + item.fechado;
+                        }
                     }
                 }
             }
-        }).catch((error) => {
-            console.error(error);
         });
 
-        // 3. Guardar de forma limpia y exclusiva al hacer clic en el botón
+        // 3. Función de guardado estricta que manda los datos a Firebase al hacer clic
         window.guardarAviso = function(id) {
             const titulo = document.getElementById(`titulo-${id}`).value;
             const texto = document.getElementById(`texto-${id}`).value;
@@ -206,11 +217,11 @@
                 fechado,
                 hashId
             }).then(() => {
-                // Actualizar visualmente el hash y la fecha en el momento exacto de grabar
+                // Actualizar inmediatamente en pantalla el hash y fecha de este casillero
                 document.getElementById(`hash-${id}`).innerText = 'HASH: ' + hashId;
                 document.getElementById(`meta-${id}`).innerText = 'Actualizado: ' + fechado;
 
-                // Feedback visual sutil en el botón
+                // Feedback visual en el botón
                 const btn = document.querySelector(`#tarjeta-${id} .btn-guardar`);
                 const originalText = btn.innerText;
                 btn.innerText = '✓ Guardado';
