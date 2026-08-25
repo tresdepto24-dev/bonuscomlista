@@ -52,9 +52,12 @@
         .tarjeta-aviso {
             background: #faedcd;
             border: 2px dashed #bc6c25;
-            padding: 8px 10px;
+            padding: 10px;
             border-radius: 3px;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .tarjeta-aviso h3 {
             font-family: 'Special Elite', cursive;
@@ -70,7 +73,7 @@
         .meta-aviso {
             font-size: 0.6rem;
             color: #5c3a21;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: bold;
         }
         .campo-input, .campo-textarea {
@@ -86,12 +89,27 @@
         }
         .campo-textarea {
             resize: vertical;
-            height: 40px;
+            height: 42px;
         }
-        .btn-guardar {
+        /* Estilos para cuando el aviso queda FIJO */
+        .contenido-fijo {
+            margin-bottom: 8px;
+        }
+        .titulo-fijo {
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: #2c1810;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .texto-fijo {
+            font-size: 0.75rem;
+            color: #4a2e18;
+            white-space: pre-wrap;
+            line-height: 1.2;
+        }
+        .btn {
             width: 100%;
-            background: #5c3a21;
-            color: #f4ebd0;
             border: none;
             padding: 4px;
             font-family: 'Special Elite', cursive;
@@ -100,8 +118,20 @@
             border-radius: 2px;
             text-align: center;
         }
+        .btn-guardar {
+            background: #5c3a21;
+            color: #f4ebd0;
+        }
         .btn-guardar:hover {
             background: #7c4e31;
+        }
+        .btn-editar {
+            background: #bc6c25;
+            color: #fff;
+            margin-top: 5px;
+        }
+        .btn-editar:hover {
+            background: #d4833b;
         }
         .pie-guia {
             text-align: center;
@@ -131,7 +161,7 @@
         </div>
     </div>
 
-    <!-- Scripts de Firebase con lógica de carga y guardado firme por botón -->
+    <!-- Scripts de Firebase con vista fija e impresa -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -153,7 +183,7 @@
         const totalAvisos = 50;
         const contenedor = document.getElementById('grillaAvisos');
 
-        // 1. Generar la estructura de los 50 casilleros en pantalla
+        // 1. Generar la estructura de los 50 casilleros
         for (let i = 1; i <= totalAvisos; i++) {
             const numStr = i < 10 ? '00' + i : (i < 100 ? '0' + i : i);
             contenedor.innerHTML += `
@@ -164,25 +194,33 @@
                     </h3>
                     <div class="meta-aviso" id="meta-${i}">Actualizado: --/--/---- --:-- hs</div>
                     
-                    <input type="text" id="titulo-${i}" class="campo-input" placeholder="Comercio / Actividad">
-                    <textarea id="texto-${i}" class="campo-textarea" placeholder="Teléfono, dirección y datos..."></textarea>
-                    
-                    <button class="btn-guardar" onclick="guardarAviso(${i})">💾 Guardar Casillero</button>
+                    <!-- Vista editable (Formulario) -->
+                    <div id="form-edit-${i}">
+                        <input type="text" id="titulo-${i}" class="campo-input" placeholder="Comercio / Actividad">
+                        <textarea id="texto-${i}" class="campo-textarea" placeholder="Teléfono, dirección y datos..."></textarea>
+                        <button class="btn btn-guardar" onclick="guardarAviso(${i})">💾 Guardar Casillero</button>
+                    </div>
+
+                    <!-- Vista fija (Texto impreso) -->
+                    <div id="vista-fija-${i}" style="display: none;">
+                        <div class="contenido-fijo">
+                            <div class="titulo-fijo" id="fijo-titulo-${i}"></div>
+                            <div class="texto-fijo" id="fijo-texto-${i}"></div>
+                        </div>
+                        <button class="btn btn-editar" onclick="activarEdicion(${i})">✏️ Editar Aviso</button>
+                    </div>
                 </div>
             `;
         }
 
-        // 2. Cargar los datos grabados una sola vez al entrar a la página
+        // 2. Cargar datos desde Firebase y fijar los casilleros que ya tienen contenido
         get(child(dbRef, 'bonuscom_guia_tel_50')).then((snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 for (let i = 1; i <= totalAvisos; i++) {
                     const item = data['aviso_' + i];
-                    if (item) {
-                        if (item.titulo) document.getElementById(`titulo-${i}`).value = item.titulo;
-                        if (item.texto) document.getElementById(`texto-${i}`).value = item.texto;
-                        if (item.hashId) document.getElementById(`hash-${i}`).innerText = 'HASH: ' + item.hashId;
-                        if (item.fechado) document.getElementById(`meta-${i}`).innerText = 'Actualizado: ' + item.fechado;
+                    if (item && item.titulo && item.texto) {
+                        mostrarFijo(i, item.titulo, item.texto, item.hashId, item.fechado);
                     }
                 }
             }
@@ -190,10 +228,38 @@
             console.error("Error al cargar datos:", error);
         });
 
-        // 3. Guardado estricto y firme al hacer clic en el botón de cada casillero
+        // Función para cambiar el casillero a formato FIJO IMPRESO
+        function mostrarFijo(id, titulo, texto, hashId, fechado) {
+            document.getElementById(`fijo-titulo-${id}`).innerText = titulo;
+            document.getElementById(`fijo-texto-${id}`).innerText = texto;
+            if (hashId) document.getElementById(`hash-${id}`).innerText = 'HASH: ' + hashId;
+            if (fechado) document.getElementById(`meta-${id}`).innerText = 'Actualizado: ' + fechado;
+
+            document.getElementById(`form-edit-${id}`).style.display = 'none';
+            document.getElementById(`vista-fija-${id}`).style.display = 'block';
+        }
+
+        // Función para volver a abrir el formulario y EDITAR
+        window.activarEdicion = function(id) {
+            const tituloActual = document.getElementById(`fijo-titulo-${id}`).innerText;
+            const textoActual = document.getElementById(`fijo-texto-${id}`).innerText;
+
+            document.getElementById(`titulo-${id}`).value = tituloActual;
+            document.getElementById(`texto-${id}`).value = textoActual;
+
+            document.getElementById(`vista-fija-${id}`).style.display = 'none';
+            document.getElementById(`form-edit-${id}`).style.display = 'block';
+        };
+
+        // 3. Guardar en Firebase y FIJAR de inmediato el aviso
         window.guardarAviso = function(id) {
-            const titulo = document.getElementById(`titulo-${id}`).value;
-            const texto = document.getElementById(`texto-${id}`).value;
+            const titulo = document.getElementById(`titulo-${id}`).value.trim();
+            const texto = document.getElementById(`texto-${id}`).value.trim();
+
+            if (!titulo || !texto) {
+                alert("Por favor completá el título y la descripción antes de guardar.");
+                return;
+            }
             
             const ahora = new Date();
             const fechado = ahora.toLocaleDateString('es-AR') + ' ' + ahora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -206,15 +272,8 @@
                 fechado,
                 hashId
             }).then(() => {
-                // Actualizar de inmediato los datos visuales en pantalla
-                document.getElementById(`hash-${id}`).innerText = 'HASH: ' + hashId;
-                document.getElementById(`meta-${id}`).innerText = 'Actualizado: ' + fechado;
-
-                // Botón con feedback visual de éxito
-                const btn = document.querySelector(`#tarjeta-${id} .btn-guardar`);
-                const originalText = btn.innerText;
-                btn.innerText = '✓ Guardado OK';
-                setTimeout(() => { btn.innerText = originalText; }, 1800);
+                // Al guardar exitosamente, pasamos el casillero a modo FIJO impreso
+                mostrarFijo(id, titulo, texto, hashId, fechado);
             }).catch((error) => {
                 alert('No se pudo guardar: ' + error.message);
             });
