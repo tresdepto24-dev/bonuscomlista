@@ -1,173 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bonuscom Guía — Clasificados de 50 Secciones (VentaniYA MDP)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Courier Prime', monospace;
-            background-color: #2b1d11;
-            color: #2c1810;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        .contenedor-guia {
-            width: 100%;
-            max-width: 1100px;
-            background: #f4ebd0;
-            border: 4px solid #4a2e18;
-            padding: 25px;
-            box-shadow: 0 0 25px rgba(0,0,0,0.8);
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .encabezado {
-            border-bottom: 3px double #4a2e18;
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .encabezado h1 {
-            font-family: 'Special Elite', cursive;
-            font-size: 2.2rem;
-            margin: 0;
-            color: #2c1810;
-        }
-        .encabezado p {
-            font-size: 0.8rem;
-            color: #7c4e31;
-            margin: 5px 0 0 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .grilla-avisos {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 10px;
-        }
-        .tarjeta-aviso {
-            background: #faedcd;
-            border: 2px dashed #bc6c25;
-            padding: 10px;
-            border-radius: 3px;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .tarjeta-aviso h3 {
-            font-family: 'Special Elite', cursive;
-            margin: 0 0 4px 0;
-            color: #bc6c25;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px dotted #bc6c25;
-            padding-bottom: 3px;
-        }
-        .meta-aviso {
-            font-size: 0.6rem;
-            color: #5c3a21;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-        .campo-input, .campo-textarea {
-            width: 100%;
-            background: #fff;
-            border: 1px solid #bc6c25;
-            padding: 4px 6px;
-            font-family: 'Courier Prime', monospace;
-            font-size: 0.75rem;
-            margin-bottom: 4px;
-            box-sizing: border-box;
-            border-radius: 2px;
-        }
-        .campo-textarea {
-            resize: vertical;
-            height: 40px;
-        }
-        /* Estilos del aviso FIJO IMPRESO */
-        .contenido-fijo {
-            margin-bottom: 8px;
-            background: #fff;
-            border: 1px solid #bc6c25;
-            padding: 6px;
-            border-radius: 2px;
-            min-height: 50px;
-        }
-        .titulo-fijo {
-            font-weight: bold;
-            font-size: 0.8rem;
-            color: #2c1810;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-            border-bottom: 1px solid #f4ebd0;
-            padding-bottom: 2px;
-        }
-        .texto-fijo {
-            font-size: 0.7rem;
-            color: #4a2e18;
-            white-space: pre-wrap;
-            line-height: 1.2;
-        }
-        .btn {
-            width: 100%;
-            border: none;
-            padding: 4px;
-            font-family: 'Special Elite', cursive;
-            font-size: 0.7rem;
-            cursor: pointer;
-            border-radius: 2px;
-            text-align: center;
-        }
-        .btn-guardar {
-            background: #5c3a21;
-            color: #f4ebd0;
-        }
-        .btn-guardar:hover {
-            background: #7c4e31;
-        }
-        .btn-editar {
-            background: #bc6c25;
-            color: #fff;
-        }
-        .btn-editar:hover {
-            background: #d4833b;
-        }
-        .pie-guia {
-            text-align: center;
-            border-top: 2px dashed #4a2e18;
-            padding-top: 15px;
-            margin-top: 25px;
-            font-size: 0.75rem;
-            color: #5c3a21;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="contenedor-guia">
-        <div class="encabezado">
-            <h1>BONUSCOM GUÍA</h1>
-            <p>Sección Clasificados Telefónicos (50 Casilleros) — Sello VentaniYA! Mar del Plata</p>
-        </div>
-
-        <div class="grilla-avisos" id="grillaAvisos">
-            <!-- Los 50 avisos se generan dinámicamente -->
-        </div>
-
-        <div class="pie-guia">
-            <strong>BonusCom Guía & VentaniYA! MDP 2026</strong><br>
-            Directorio Telefónico y Comercial en Tiempo Real
-        </div>
-    </div>
-
-    <!-- Scripts de Firebase con control total de estados fijos -->
+<!-- Scripts de Firebase blindados para lectura y guardado persistente -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -204,7 +35,7 @@
                     <div id="form-edit-${i}">
                         <input type="text" id="titulo-${i}" class="campo-input" placeholder="Comercio / Actividad">
                         <textarea id="texto-${i}" class="campo-textarea" placeholder="Teléfono, dirección y datos..."></textarea>
-                        <button class="btn btn-guardar" id="btn-g-${i}">💾 Guardar Casillero</button>
+                        <button class="btn btn-guardar" id="btn-g-${i}" type="button">💾 Guardar Casillero</button>
                     </div>
 
                     <!-- Vista fija (Texto impreso bloqueado) -->
@@ -213,71 +44,101 @@
                             <div class="titulo-fijo" id="fijo-titulo-${i}"></div>
                             <div class="texto-fijo" id="fijo-texto-${i}"></div>
                         </div>
-                        <button class="btn btn-editar" id="btn-e-${i}">✏️ Modificar Aviso</button>
+                        <button class="btn btn-editar" id="btn-e-${i}" type="button">✏️ Modificar Aviso</button>
                     </div>
                 </div>
             `;
         }
 
-        // Función global para congelar el casillero en modo FIJO
+        // 2. Función global para congelar el casillero en modo FIJO
         window.fijarCasillero = function(id, titulo, texto, hashId, fechado) {
-            document.getElementById(`fijo-titulo-${id}`).innerText = titulo;
-            document.getElementById(`fijo-texto-${id}`).innerText = texto;
-            if (hashId) document.getElementById(`hash-${id}`).innerText = 'HASH: ' + hashId;
-            if (fechado) document.getElementById(`meta-${id}`).innerText = 'Actualizado: ' + fechado;
+            const tFijo = document.getElementById(`fijo-titulo-${id}`);
+            const tTexto = document.getElementById(`fijo-texto-${id}`);
+            const hEl = document.getElementById(`hash-${id}`);
+            const mEl = document.getElementById(`meta-${id}`);
 
-            document.getElementById(`form-edit-${id}`).style.display = 'none';
-            document.getElementById(`vista-fija-${id}`).style.display = 'block';
+            if (tFijo) tFijo.innerText = titulo || '';
+            if (tTexto) tTexto.innerText = texto || '';
+            if (hashId && hEl) hEl.innerText = 'HASH: ' + hashId;
+            if (fechado && mEl) mEl.innerText = 'Actualizado: ' + fechado;
+
+            const formEdit = document.getElementById(`form-edit-${id}`);
+            const vistaFija = document.getElementById(`vista-fija-${id}`);
+            if (formEdit) formEdit.style.display = 'none';
+            if (vistaFija) vistaFija.style.display = 'block';
         };
 
-        // Función global para volver a editar
+        // 3. Función global para volver a editar
         window.habilitarEdicion = function(id) {
-            const tituloActual = document.getElementById(`fijo-titulo-${id}`).innerText;
-            const textoActual = document.getElementById(`fijo-texto-${id}`).innerText;
+            const elTituloFijo = document.getElementById(`fijo-titulo-${id}`);
+            const elTextoFijo = document.getElementById(`fijo-texto-${id}`);
+            const inputTitulo = document.getElementById(`titulo-${id}`);
+            const inputTexto = document.getElementById(`texto-${id}`);
 
-            document.getElementById(`titulo-${id}`).value = tituloActual;
-            document.getElementById(`texto-${id}`).value = textoActual;
+            if (elTituloFijo && inputTitulo) inputTitulo.value = elTituloFijo.innerText;
+            if (elTextoFijo && inputTexto) inputTexto.value = elTextoFijo.innerText;
 
-            document.getElementById(`vista-fija-${id}`).style.display = 'none';
-            document.getElementById(`form-edit-${id}`).style.display = 'block';
+            const vistaFija = document.getElementById(`vista-fija-${id}`);
+            const formEdit = document.getElementById(`form-edit-${id}`);
+            if (vistaFija) vistaFija.style.display = 'none';
+            if (formEdit) formEdit.style.display = 'block';
         };
 
-        // Asignar eventos limpios mediante JavaScript nativo para evitar fallos de alcance
+        // 4. Asignar eventos a los botones de guardar y editar de cada tarjeta
         for (let i = 1; i <= totalAvisos; i++) {
-            document.getElementById(`btn-g-${i}`).addEventListener('click', () => {
-                const titulo = document.getElementById(`titulo-${i}`).value.trim();
-                const texto = document.getElementById(`texto-${i}`).value.trim();
+            const btnGuardar = document.getElementById(`btn-g-${i}`);
+            if (btnGuardar) {
+                btnGuardar.addEventListener('click', () => {
+                    const id = i;
+                    const campoTitulo = document.getElementById(`titulo-${id}`);
+                    const campoTexto = document.getElementById(`texto-${id}`);
+                    
+                    const titulo = campoTitulo ? campoTitulo.value.trim() : '';
+                    const texto = campoTexto ? campoTexto.value.trim() : '';
 
-                if (!titulo || !texto) {
-                    alert("Completá el título y la descripción para fijar el aviso.");
-                    return;
-                }
+                    if (!titulo || !texto) {
+                        alert("Completá el título y la descripción para fijar el aviso.");
+                        return;
+                    }
 
-                const ahora = new Date();
-                const fechado = ahora.toLocaleDateString('es-AR') + ' ' + ahora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
-                const hashId = 'TEL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                    const ahora = new Date();
+                    const fechado = ahora.toLocaleDateString('es-AR') + ' ' + ahora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    const hashId = 'TEL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-                const avisoRef = ref(db, 'bonuscom_guia_tel_50/aviso_' + i);
-                set(avisoRef, { titulo, texto, fechado, hashId }).then(() => {
-                    fijarCasillero(i, titulo, texto, hashId, fechado);
-                }).catch((error) => {
-                    alert('Error al guardar: ' + error.message);
+                    const avisoRef = ref(db, 'bonuscom_guia_tel_50/aviso_' + id);
+                    set(avisoRef, { 
+                        titulo: titulo, 
+                        texto: texto, 
+                        fechado: fechado, 
+                        hashId: hashId 
+                    }).then(() => {
+                        fijarCasillero(id, titulo, texto, hashId, fechado);
+                    }).catch((error) => {
+                        alert('Error al guardar: ' + error.message);
+                    });
                 });
-            });
+            }
 
-            document.getElementById(`btn-e-${i}`).addEventListener('click', () => {
-                habilitarEdicion(i);
-            });
+            const btnEditar = document.getElementById(`btn-e-${i}`);
+            if (btnEditar) {
+                btnEditar.addEventListener('click', () => {
+                    habilitarEdicion(i);
+                });
+            }
         }
 
-        // 2. Cargar datos desde Firebase al abrir la página y fijar los que ya estén guardados
+        // 5. Cargar datos desde Firebase al abrir la página y restaurarlos de forma segura
         get(child(dbRef, 'bonuscom_guia_tel_50')).then((snapshot) => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 for (let i = 1; i <= totalAvisos; i++) {
                     const item = data['aviso_' + i];
-                    if (item && item.titulo && item.texto) {
-                        fijarCasillero(i, item.titulo, item.texto, item.hashId, item.fechado);
+                    if (item) {
+                        const t = item.titulo || '';
+                        const tx = item.texto || '';
+                        if (t || tx) {
+                            fijarCasillero(i, t, tx, item.hashId, item.fechado);
+                        }
                     }
                 }
             }
@@ -285,5 +146,3 @@
             console.error("Error al cargar datos:", error);
         });
     </script>
-</body>
-</html>
