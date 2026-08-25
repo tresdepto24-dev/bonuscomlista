@@ -1,5 +1,4 @@
-<!-- Scripts de Firebase blindados para lectura y guardado persistente -->
-    <script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
@@ -20,7 +19,7 @@
         const totalAvisos = 50;
         const contenedor = document.getElementById('grillaAvisos');
 
-        // 1. Generar la estructura de los 50 casilleros
+        // 1. Generar la estructura de los casilleros
         for (let i = 1; i <= totalAvisos; i++) {
             const numStr = i < 10 ? '00' + i : (i < 100 ? '0' + i : i);
             contenedor.innerHTML += `
@@ -31,14 +30,12 @@
                     </h3>
                     <div class="meta-aviso" id="meta-${i}">Actualizado: --/--/---- --:-- hs</div>
                     
-                    <!-- Vista editable (Formulario) -->
                     <div id="form-edit-${i}">
                         <input type="text" id="titulo-${i}" class="campo-input" placeholder="Comercio / Actividad">
                         <textarea id="texto-${i}" class="campo-textarea" placeholder="Teléfono, dirección y datos..."></textarea>
                         <button class="btn btn-guardar" id="btn-g-${i}" type="button">💾 Guardar Casillero</button>
                     </div>
 
-                    <!-- Vista fija (Texto impreso bloqueado) -->
                     <div id="vista-fija-${i}" style="display: none;">
                         <div class="contenido-fijo">
                             <div class="titulo-fijo" id="fijo-titulo-${i}"></div>
@@ -50,7 +47,6 @@
             `;
         }
 
-        // 2. Función global para congelar el casillero en modo FIJO
         window.fijarCasillero = function(id, titulo, texto, hashId, fechado) {
             const tFijo = document.getElementById(`fijo-titulo-${id}`);
             const tTexto = document.getElementById(`fijo-texto-${id}`);
@@ -68,7 +64,6 @@
             if (vistaFija) vistaFija.style.display = 'block';
         };
 
-        // 3. Función global para volver a editar
         window.habilitarEdicion = function(id) {
             const elTituloFijo = document.getElementById(`fijo-titulo-${id}`);
             const elTextoFijo = document.getElementById(`fijo-texto-${id}`);
@@ -84,20 +79,32 @@
             if (formEdit) formEdit.style.display = 'block';
         };
 
-        // 4. Asignar eventos a los botones de guardar y editar de cada tarjeta
+        // 2. Cargar datos existentes de Firebase al iniciar
+        get(child(dbRef, 'bonuscom_guia_tel_50')).then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                for (let i = 1; i <= totalAvisos; i++) {
+                    const item = data['aviso_' + i];
+                    if (item && (item.titulo || item.texto)) {
+                        fijarCasillero(i, item.titulo, item.texto, item.hashId, item.fechado);
+                    }
+                }
+            }
+        }).catch((error) => {
+            console.error("Error al cargar:", error);
+        });
+
+        // 3. Configurar eventos de guardado
         for (let i = 1; i <= totalAvisos; i++) {
             const btnGuardar = document.getElementById(`btn-g-${i}`);
             if (btnGuardar) {
                 btnGuardar.addEventListener('click', () => {
                     const id = i;
-                    const campoTitulo = document.getElementById(`titulo-${id}`);
-                    const campoTexto = document.getElementById(`texto-${id}`);
-                    
-                    const titulo = campoTitulo ? campoTitulo.value.trim() : '';
-                    const texto = campoTexto ? campoTexto.value.trim() : '';
+                    const titulo = document.getElementById(`titulo-${id}`).value.trim();
+                    const texto = document.getElementById(`texto-${id}`).value.trim();
 
                     if (!titulo || !texto) {
-                        alert("Completá el título y la descripción para fijar el aviso.");
+                        alert("Completá el título y la descripción.");
                         return;
                     }
 
@@ -106,43 +113,17 @@
                     const hashId = 'TEL-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
                     const avisoRef = ref(db, 'bonuscom_guia_tel_50/aviso_' + id);
-                    set(avisoRef, { 
-                        titulo: titulo, 
-                        texto: texto, 
-                        fechado: fechado, 
-                        hashId: hashId 
-                    }).then(() => {
+                    set(avisoRef, { titulo, texto, fechado, hashId }).then(() => {
                         fijarCasillero(id, titulo, texto, hashId, fechado);
                     }).catch((error) => {
-                        alert('Error al guardar: ' + error.message);
+                        alert('Error de permisos o red al guardar: ' + error.message);
                     });
                 });
             }
 
             const btnEditar = document.getElementById(`btn-e-${i}`);
             if (btnEditar) {
-                btnEditar.addEventListener('click', () => {
-                    habilitarEdicion(i);
-                });
+                btnEditar.addEventListener('click', () => habilitarEdicion(i));
             }
         }
-
-        // 5. Cargar datos desde Firebase al abrir la página y restaurarlos de forma segura
-        get(child(dbRef, 'bonuscom_guia_tel_50')).then((snapshot) => {
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                for (let i = 1; i <= totalAvisos; i++) {
-                    const item = data['aviso_' + i];
-                    if (item) {
-                        const t = item.titulo || '';
-                        const tx = item.texto || '';
-                        if (t || tx) {
-                            fijarCasillero(i, t, tx, item.hashId, item.fechado);
-                        }
-                    }
-                }
-            }
-        }).catch((error) => {
-            console.error("Error al cargar datos:", error);
-        });
     </script>
